@@ -115,24 +115,41 @@ const Products = () => {
       <TableContainer
         component={Paper}
         sx={{
-          height: 400, // fixed height
+          height: 400,
           borderRadius: 2,
           boxShadow: 3,
+          overflowX: "auto", // enable horizontal scroll
         }}
       >
         <Table stickyHeader size="small">
           <TableHead>
             <TableRow>
-              <TableCell sx={{ width: 70, fontWeight: "bold" }}>ID</TableCell>
+              {/* Sticky ID Header */}
+              <TableCell
+                sx={{
+                  width: 70,
+                  fontWeight: "bold",
+                  position: "sticky",
+                  left: 0,
+                  backgroundColor: "#fff",
+                  zIndex: 3,
+                }}
+              >
+                ID
+              </TableCell>
+
               <TableCell sx={{ width: 220, fontWeight: "bold" }}>
                 Title
               </TableCell>
+
               <TableCell sx={{ width: 160, fontWeight: "bold" }}>
                 Category
               </TableCell>
+
               <TableCell sx={{ width: 100, fontWeight: "bold" }}>
                 Price
               </TableCell>
+
               <TableCell sx={{ width: 350, fontWeight: "bold" }}>
                 Description
               </TableCell>
@@ -147,7 +164,17 @@ const Products = () => {
                 sx={{ cursor: "pointer" }}
                 onClick={() => navigate(`/products/${item.id}`)}
               >
-                <TableCell>{item.id}</TableCell>
+                {/* Sticky ID Cell */}
+                <TableCell
+                  sx={{
+                    position: "sticky",
+                    left: 0,
+                    backgroundColor: "#fff",
+                    zIndex: 2,
+                  }}
+                >
+                  {item.id}
+                </TableCell>
 
                 <TableCell
                   sx={{
@@ -190,18 +217,27 @@ const Products = () => {
       </TableContainer>
 
       {/* Pagination */}
-      <TablePagination
-        component="div"
-        rowsPerPageOptions={[10, 20, 50]}
-        count={filteredData.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={(e, newPage) => setPage(newPage)}
-        onRowsPerPageChange={(e) => {
-          setRowsPerPage(parseInt(e.target.value, 10));
-          setPage(0);
+      <Box
+        sx={{
+          width: "100%",
+          overflowX: "hidden",
+          display: "flex",
+          justifyContent: {xs:"center",md:"right"},
         }}
-      />
+      >
+        <TablePagination
+          component="div"
+          rowsPerPageOptions={[10, 20, 50]}
+          count={filteredData.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={(e, newPage) => setPage(newPage)}
+          onRowsPerPageChange={(e) => {
+            setRowsPerPage(parseInt(e.target.value, 10));
+            setPage(0);
+          }}
+        />
+      </Box>
     </Box>
   );
 };
