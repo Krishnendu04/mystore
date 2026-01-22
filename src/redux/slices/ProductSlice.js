@@ -12,15 +12,15 @@ export const fetchProduct = createAsyncThunk(
       const { products, lastFetched, isLoading } = getState().product;
       // Prevent multiple simultaneous calls
       if (isLoading) return false;
-      // First load → fetch
+      // First load => fetch
       if (!products.length) return true;
       const now = Date.now();
       const TEN_MINUTES = 10 * 60 * 1000;
-      // If data is still fresh → don't fetch
+      // If data is still fresh => don't fetch
       if (now - lastFetched < TEN_MINUTES) {
         return false;
       }
-      // Cache expired → fetch again
+      // Cache expired => fetch again
       return true;
     }
   }
