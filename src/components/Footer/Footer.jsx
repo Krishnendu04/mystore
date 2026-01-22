@@ -6,8 +6,9 @@ import {
   IconButton,
   TextField,
   Button,
-  Stack
+  Stack,
 } from "@mui/material";
+import { Link as RouterLink } from "react-router-dom";
 
 import Grid from "@mui/material/Grid";
 import StorefrontIcon from "@mui/icons-material/Storefront";
@@ -63,13 +64,28 @@ const Footer = () => {
             <Typography variant="h6" gutterBottom>
               Shop
             </Typography>
-            <Link href="/products" color="inherit" underline="hover">
+            <Link
+              component={RouterLink}
+              to="/products"
+              color="inherit"
+              underline="hover"
+            >
               Products
             </Link>
-            <Link href="/products" color="inherit" underline="hover">
+            <Link
+              component={RouterLink}
+              to="/products"
+              color="inherit"
+              underline="hover"
+            >
               Categories
             </Link>
-            <Link href="/products" color="inherit" underline="hover">
+            <Link
+              component={RouterLink}
+              to="/products"
+              color="inherit"
+              underline="hover"
+            >
               Deals
             </Link>
           </Grid>
@@ -87,13 +103,28 @@ const Footer = () => {
             <Typography variant="h6" gutterBottom>
               Support
             </Typography>
-            <Link href="c/contact" color="inherit" underline="hover">
+            <Link
+              component={RouterLink}
+              to="/contact"
+              color="inherit"
+              underline="hover"
+            >
               Help Center
             </Link>
-            <Link href="/about" color="inherit" underline="hover">
+            <Link
+              component={RouterLink}
+              to="/about"
+              color="inherit"
+              underline="hover"
+            >
               Returns
             </Link>
-            <Link href="/contact" color="inherit" underline="hover">
+            <Link
+              component={RouterLink}
+              to="/contact"
+              color="inherit"
+              underline="hover"
+            >
               Contact Us
             </Link>
           </Grid>
