@@ -143,7 +143,7 @@ const Footer = () => {
                 display: "flex",
                 gap: 1,
                 mt: 1,
-                flexDirection: { xs: "column", sm: "row" },
+                flexDirection: "row",
                 alignItems: "center",
               }}
             >
