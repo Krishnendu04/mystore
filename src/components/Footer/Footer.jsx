@@ -117,7 +117,7 @@ const Footer = () => {
               color="inherit"
               underline="hover"
             >
-              Returns
+              About
             </Link>
             <Link
               component={RouterLink}
