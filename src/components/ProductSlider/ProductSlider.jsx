@@ -19,9 +19,9 @@ const CARD_HEIGHT = 360;
 
 export default function ProductSlider() {
   const dispatch = useDispatch();
-  const navigate=useNavigate();
+  const navigate = useNavigate();
   const { isLoading, isError, products } = useSelector(
-    (state) => state.product
+    (state) => state.product,
   );
 
   useEffect(() => {
@@ -50,14 +50,23 @@ export default function ProductSlider() {
           {/* Skeleton */}
           {isLoading &&
             Array.from({ length: 5 }).map((_, index) => (
-              <Grid key={index} gridColumn="span 1" display="flex" justifyContent="center">
+              <Grid
+                key={index}
+                gridColumn="span 1"
+                display="flex"
+                justifyContent="center"
+              >
                 <Card sx={cardStyle}>
                   <Skeleton variant="rectangular" height={160} />
                   <CardContent>
                     <Skeleton width="80%" />
                     <Skeleton width="60%" />
                     <Skeleton width="40%" />
-                    <Skeleton variant="rectangular" height={36} sx={{ mt: 2 }} />
+                    <Skeleton
+                      variant="rectangular"
+                      height={36}
+                      sx={{ mt: 2 }}
+                    />
                   </CardContent>
                 </Card>
               </Grid>
@@ -73,14 +82,16 @@ export default function ProductSlider() {
                 display="flex"
                 justifyContent="center"
               >
-                <Card sx={cardStyle}>
+                <Card
+                  sx={cardStyle}
+                  onClick={() => navigate(`/products/${product.id}`)}
+                >
                   <CardMedia
                     component="img"
                     height="160"
                     image={product.thumbnail || product.images?.[0]}
                     alt={product.title}
                     sx={{ objectFit: "cover" }}
-                    onClick={() => navigate(`/products/${product.id}`)}
                   />
 
                   <CardContent sx={{ flexGrow: 1 }}>
@@ -95,11 +106,16 @@ export default function ProductSlider() {
                     <Typography variant="h6" color="primary" mt={1}>
                       ${product.price}
                     </Typography>
-                    
-                    <Box display="flex" justifyContent="center" mt={1}>
+
+                    {/* Wrap the button in a Box and stop propagation here */}
+                    <Box
+                      display="flex"
+                      justifyContent="center"
+                      mt={1}
+                      onClick={(e) => e.stopPropagation()} // stops card click
+                    >
                       <AddToCartButton product={product} />
                     </Box>
-                    
                   </CardContent>
                 </Card>
               </Grid>

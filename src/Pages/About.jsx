@@ -5,7 +5,6 @@ import aboutBanner from "../assets/images/about/about.png";
 const About = () => {
   return (
     <Box sx={{ p: { xs: 2, md: 6 } }}>
-
       {/* Hero Section */}
       <Box
         sx={{
@@ -20,20 +19,30 @@ const About = () => {
           About Our Store
         </Typography>
         <Typography variant="h6" color="text.secondary">
-          We provide top-quality products with a focus on customer satisfaction and innovation.
+          We provide top-quality products with a focus on customer satisfaction
+          and innovation.
         </Typography>
       </Box>
 
       {/* Full Width Banner Image with Same Height as Hero Box */}
-      <Box sx={{ width: "90vw", overflow: "hidden", mb: 6 }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          px: { xs: 2, sm: 4, md: 6 },
+          mb: 6,
+          overflow: "hidden",
+        }}
+      >
         <img
           src={aboutBanner}
           alt="Our Story"
           style={{
             width: "100%",
-            height: "350px", // approximate same height as Hero Box
+            maxWidth: "1200px", // optional max width
+            height: "auto", // maintain aspect ratio
             display: "block",
-            objectFit: "cover",
+            objectFit: "contain", // full image visible
           }}
         />
       </Box>
@@ -44,13 +53,15 @@ const About = () => {
           Our Story
         </Typography>
         <Typography variant="body1" mb={2}>
-          Founded in 2020, our e-commerce platform aims to bring the best products to your doorstep. We carefully select items to ensure quality and customer satisfaction.
+          Founded in 2020, our e-commerce platform aims to bring the best
+          products to your doorstep. We carefully select items to ensure quality
+          and customer satisfaction.
         </Typography>
         <Typography variant="body1">
-          Our team is committed to delivering smooth shopping experiences, fast delivery, and excellent support for every customer.
+          Our team is committed to delivering smooth shopping experiences, fast
+          delivery, and excellent support for every customer.
         </Typography>
       </Box>
-
     </Box>
   );
 };

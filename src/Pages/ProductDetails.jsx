@@ -54,7 +54,7 @@ const ProductDetails = () => {
           alignItems="center"
         >
           <img
-            src={product.images}
+            src={product.thumbnail || product.images?.[0]}
             alt={product.title}
             style={{
               maxWidth: "100%",
