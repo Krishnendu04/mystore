@@ -17,6 +17,7 @@ import {
   Typography,
   MenuItem,
   CircularProgress,
+  TableSortLabel,
 } from "@mui/material";
 
 const Products = () => {
@@ -29,13 +30,25 @@ const Products = () => {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10); // 10 per page
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  // null = no sorting, "asc" | "desc" = active sorting
+  const [priceOrder, setPriceOrder] = useState(null);
 
   useEffect(() => {
     dispatch(fetchProduct());
   }, [dispatch]);
 
-  // Search + Category Filter
+  // Toggle price sorting
+  const handlePriceSort = () => {
+    setPriceOrder((prev) => {
+      if (prev === null) return "asc";
+      if (prev === "asc") return "desc";
+      return null; // back to unsorted
+    });
+  };
+
+  // Search + Category filter (NO sorting here)
   const filteredData = useMemo(() => {
     return filtered.filter((item) => {
       const matchSearch = item.title
@@ -49,17 +62,27 @@ const Products = () => {
     });
   }, [filtered, search, selectedCategory]);
 
-  // Pagination
-  const paginatedData = filteredData.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage,
-  );
+  // Pagination + Page-wise conditional sorting
+  const paginatedData = useMemo(() => {
+    const pageData = filteredData.slice(
+      page * rowsPerPage,
+      page * rowsPerPage + rowsPerPage,
+    );
+
+    // First load => keep API order (ID ascending)
+    if (!priceOrder) return pageData;
+
+    // After clicking Price => sort only this page
+    return [...pageData].sort((a, b) =>
+      priceOrder === "asc" ? a.price - b.price : b.price - a.price,
+    );
+  }, [filteredData, page, rowsPerPage, priceOrder]);
 
   if (isLoading)
     return (
       <Box
         sx={{
-          minHeight: "50vh", // center vertically in half page
+          minHeight: "50vh",
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
@@ -68,6 +91,7 @@ const Products = () => {
         <CircularProgress size={60} color="primary" />
       </Box>
     );
+
   if (isError) return <p>Error...</p>;
 
   return (
@@ -78,7 +102,6 @@ const Products = () => {
 
       {/* Filters */}
       <Box display="flex" gap={2} mb={2} flexWrap="wrap" alignItems="center">
-        {/* Search */}
         <TextField
           label="Search by title"
           size="small"
@@ -90,7 +113,6 @@ const Products = () => {
           }}
         />
 
-        {/* Category Dropdown */}
         <TextField
           select
           label="Category"
@@ -118,13 +140,12 @@ const Products = () => {
           height: 400,
           borderRadius: 2,
           boxShadow: 3,
-          overflowX: "auto", // enable horizontal scroll
+          overflowX: "auto",
         }}
       >
         <Table stickyHeader size="small">
           <TableHead>
             <TableRow>
-              {/* Sticky ID Header */}
               <TableCell
                 sx={{
                   width: 70,
@@ -146,8 +167,15 @@ const Products = () => {
                 Category
               </TableCell>
 
+              {/* Sortable Price */}
               <TableCell sx={{ width: 100, fontWeight: "bold" }}>
-                Price
+                <TableSortLabel
+                  active={Boolean(priceOrder)}
+                  direction={priceOrder === "desc" ? "desc" : "asc"}
+                  onClick={handlePriceSort}
+                >
+                  Price
+                </TableSortLabel>
               </TableCell>
 
               <TableCell sx={{ width: 350, fontWeight: "bold" }}>
@@ -164,7 +192,6 @@ const Products = () => {
                 sx={{ cursor: "pointer" }}
                 onClick={() => navigate(`/products/${item.id}`)}
               >
-                {/* Sticky ID Cell */}
                 <TableCell
                   sx={{
                     position: "sticky",
@@ -222,7 +249,7 @@ const Products = () => {
           width: "100%",
           overflowX: "hidden",
           display: "flex",
-          justifyContent: {xs:"center",md:"right"},
+          justifyContent: { xs: "center", md: "right" },
         }}
       >
         <TablePagination
