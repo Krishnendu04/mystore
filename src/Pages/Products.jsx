@@ -19,6 +19,7 @@ import {
   CircularProgress,
   TableSortLabel,
 } from "@mui/material";
+import useDebounce from "../hooks/useDebounce";
 
 const Products = () => {
   const dispatch = useDispatch();
@@ -48,19 +49,21 @@ const Products = () => {
     });
   };
 
+  // used custom useDebounce hook to handle search input, to avoid filtering on every keystroke.
+  const debouncedSearch=useDebounce(search,300);
   // Search + Category filter (NO sorting here)
   const filteredData = useMemo(() => {
     return filtered.filter((item) => {
       const matchSearch = item.title
         .toLowerCase()
-        .includes(search.toLowerCase());
+        .includes(debouncedSearch.toLowerCase());
 
       const matchCategory =
         selectedCategory === "all" || item.category === selectedCategory;
 
       return matchSearch && matchCategory;
     });
-  }, [filtered, search, selectedCategory]);
+  }, [filtered, debouncedSearch, selectedCategory]);
 
   // Pagination + Page-wise conditional sorting
   const paginatedData = useMemo(() => {
