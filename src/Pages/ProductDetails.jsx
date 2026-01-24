@@ -9,7 +9,7 @@ import {
   Typography,
   CircularProgress,
   Paper,
-  Button
+  Button,
 } from "@mui/material";
 import { fetchProduct } from "../redux/slices/ProductSlice";
 
@@ -17,7 +17,7 @@ const ProductDetails = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
   const { filtered, isLoading } = useSelector((state) => state.product);
-  const navigate=useNavigate();
+  const navigate = useNavigate();
   useEffect(() => {
     if (filtered.length === 0) {
       dispatch(fetchProduct());
@@ -28,7 +28,12 @@ const ProductDetails = () => {
 
   if (isLoading || !product) {
     return (
-      <Box display="flex" justifyContent="center" mt={5}>
+      <Box
+        minHeight="50vh"
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+      >
         <CircularProgress />
       </Box>
     );
@@ -70,11 +75,7 @@ const ProductDetails = () => {
             {product.title}
           </Typography>
 
-          <Typography
-            variant="subtitle1"
-            color="text.secondary"
-            gutterBottom
-          >
+          <Typography variant="subtitle1" color="text.secondary" gutterBottom>
             Category: {product.category}
           </Typography>
 
