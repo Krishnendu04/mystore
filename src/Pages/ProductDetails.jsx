@@ -1,46 +1,50 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import AddToCartButton from "../components/AddToCartButton";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { useNavigate } from "react-router-dom";
 import {
   Box,
   Typography,
   CircularProgress,
   Paper,
   Button,
+  Chip,
 } from "@mui/material";
 import { fetchProduct } from "../redux/slices/ProductSlice";
 
-const ProductDetails = () => {
+export default function ProductDetails() {
   const { id } = useParams();
   const dispatch = useDispatch();
-  const { filtered, isLoading } = useSelector((state) => state.product);
   const navigate = useNavigate();
+
+  const { products, isLoading } = useSelector((state) => state.product);
+
   useEffect(() => {
-    if (filtered.length === 0) {
+    if (!products.length) {
       dispatch(fetchProduct());
     }
-  }, [dispatch, filtered.length]);
+  }, [dispatch, products.length]);
 
-  const product = filtered.find((item) => item.id === Number(id));
+  const product = products.find((p) => p.id === Number(id));
 
   if (isLoading || !product) {
     return (
       <Box
-        minHeight="50vh"
+        minHeight="60vh"
         display="flex"
         justifyContent="center"
         alignItems="center"
       >
-        <CircularProgress />
+        <CircularProgress size={50} />
       </Box>
     );
   }
 
+  const hasDiscount = product.discount > 0;
+
   return (
-    <Box p={{ xs: 2, md: 4 }}>
+    <Box p={{ xs: 2, md: 4 }} sx={{ minHeight: "70vh" }}>
       <Paper
         elevation={3}
         sx={{
@@ -49,9 +53,24 @@ const ProductDetails = () => {
           gap: 4,
           p: 3,
           borderRadius: 2,
+          position: "relative",
         }}
       >
-        {/* LEFT SIDE - PRODUCT IMAGE */}
+        {/* Discount Badge */}
+        {hasDiscount && (
+          <Chip
+            label={`${product.discount}% OFF`}
+            color="secondary"
+            sx={{
+              position: "absolute",
+              top: 16,
+              left: 16,
+              fontWeight: "bold",
+            }}
+          />
+        )}
+
+        {/* Image */}
         <Box
           flex={1}
           display="flex"
@@ -69,7 +88,7 @@ const ProductDetails = () => {
           />
         </Box>
 
-        {/* RIGHT SIDE - PRODUCT DETAILS */}
+        {/* Details */}
         <Box flex={2}>
           <Typography variant="h5" fontWeight="bold" gutterBottom>
             {product.title}
@@ -83,18 +102,48 @@ const ProductDetails = () => {
             {product.description}
           </Typography>
 
-          <Typography variant="h6" fontWeight="bold" mb={3}>
-            Price: ${product.price}
-          </Typography>
+          {/* Price Section */}
+          {hasDiscount ? (
+            <Box mb={3}>
+              <Box display="flex" alignItems="center" gap={2}>
+                <Typography variant="h5" color="error" fontWeight="bold">
+                  ${product.discountedPrice}
+                </Typography>
 
-          {/* Reusable AddToCart Component */}
-          <AddToCartButton product={product} />
+                <Typography
+                  variant="body1"
+                  sx={{
+                    textDecoration: "line-through",
+                    color: "text.secondary",
+                  }}
+                >
+                  ${product.price}
+                </Typography>
+              </Box>
+
+              <Typography variant="body2" color="success.main">
+                You save {product.discount}% 🎉
+              </Typography>
+            </Box>
+          ) : (
+            <Typography variant="h6" fontWeight="bold" mb={3}>
+              Price: ${product.price}
+            </Typography>
+          )}
+
+          {/* Add to Cart uses discounted price */}
+          <AddToCartButton
+            product={{
+              ...product,
+              price: hasDiscount ? product.discountedPrice : product.price,
+            }}
+          />
         </Box>
       </Paper>
-      <Box display="flex" justifyContent="flex-end" mb={2} mt={2}>
+
+      <Box display="flex" justifyContent="flex-end" mt={2}>
         <Button
           variant="contained"
-          color="primary"
           startIcon={<ArrowBackIcon />}
           onClick={() => navigate(-1)}
         >
@@ -103,6 +152,4 @@ const ProductDetails = () => {
       </Box>
     </Box>
   );
-};
-
-export default ProductDetails;
+}

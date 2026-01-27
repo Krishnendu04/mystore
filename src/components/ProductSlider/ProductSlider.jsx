@@ -104,7 +104,7 @@ export default function ProductSlider() {
                     </Typography>
 
                     <Typography variant="h6" color="primary" mt={1}>
-                      ${product.price}
+                      ${product.discountedPrice}
                     </Typography>
 
                     {/* Wrap the button in a Box and stop propagation here */}
@@ -114,7 +114,9 @@ export default function ProductSlider() {
                       mt={1}
                       onClick={(e) => e.stopPropagation()} // stops card click
                     >
-                      <AddToCartButton product={product} />
+                      <AddToCartButton
+                        product={{ ...product, price: product.discountedPrice }}
+                      />
                     </Box>
                   </CardContent>
                 </Card>

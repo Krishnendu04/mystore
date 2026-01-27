@@ -32,7 +32,7 @@ export default function BannerSlider() {
   };
 
   return (
-    <Box sx={{ width: "100%",marginTop:"1%" }}>
+    <Box sx={{ width: "100%", marginTop: "1%" }}>
       {/* Banner */}
       <Box
         sx={{
@@ -104,8 +104,7 @@ export default function BannerSlider() {
               width: current === index ? 14 : 10,
               height: current === index ? 14 : 10,
               borderRadius: "50%",
-              backgroundColor:
-                current === index ? "primary.main" : "grey.400",
+              backgroundColor: current === index ? "primary.main" : "grey.400",
               cursor: "pointer",
               transition: "all 0.3s ease",
             }}

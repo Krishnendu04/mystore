@@ -74,7 +74,7 @@ const Footer = () => {
             </Link>
             <Link
               component={RouterLink}
-              to="/products"
+              to="/category"
               color="inherit"
               underline="hover"
             >
@@ -82,7 +82,7 @@ const Footer = () => {
             </Link>
             <Link
               component={RouterLink}
-              to="/products"
+              to="/deals"
               color="inherit"
               underline="hover"
             >

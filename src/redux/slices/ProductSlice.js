@@ -1,78 +1,54 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { DISCOUNT_MAP } from "../../config/discounts";
 
-// condition:(arg,thunkApi) ....thunkApi contains a big object....we destructure getState object which give us the access of the product Redux store.
 export const fetchProduct = createAsyncThunk(
-  "fetchProduct",//unique name of this api
+  "products/fetch",
   async () => {
     const res = await fetch(import.meta.env.VITE_PRODUCTS_BASE_URL);
-    return await res.json();
-  },
-  {
-    condition: (_, { getState }) => {
-      const { products, lastFetched, isLoading } = getState().product;
-      // Prevent multiple simultaneous calls
-      if (isLoading) return false;
-      // First load => fetch
-      if (!products.length) return true;
-      const now = Date.now();
-      const TEN_MINUTES = 10 * 60 * 1000;
-      // If data is still fresh => don't fetch
-      if (now - lastFetched < TEN_MINUTES) {
-        return false;
-      }
-      // Cache expired => fetch again
-      return true;
-    }
+    const json = await res.json();
+
+    const products = json.products;
+
+    return products.map((p) => {
+      const discount = DISCOUNT_MAP[p.id] || 0;
+
+      const discountedPrice = discount
+        ? +(p.price - (p.price * discount) / 100).toFixed(2)
+        : p.price;
+
+      return {
+        ...p,
+        discount,
+        discountedPrice,
+      };
+    });
   }
 );
 
 const ProductSlice = createSlice({
   name: "product",
   initialState: {
+    products: [],
+    categories: [],
     isLoading: false,
     isError: false,
-    categories: [],
-    products: [],
-    filtered: [],
-    lastFetched: null,
   },
-
-  reducers: {
-    filterByCategory: (state, action) => {
-      if (action.payload === "All") {
-        state.filtered = state.products;
-      } else {
-        state.filtered = state.products.filter(
-          (p) => p.category === action.payload,
-        );
-      }
-    },
-    filterByInput: (state, action) => {
-      const value = action.payload;
-      state.filtered = state.products.filter((p) =>
-        p.title.toLowerCase().includes(value.toLowerCase()),
-      );
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
-    builder.addCase(fetchProduct.fulfilled, (state, action) => {
-      state.isLoading = false;
-      const prod = action.payload.products||action.payload;
-      state.products = prod;
-      state.filtered = prod;
-      state.lastFetched = Date.now();
-      state.categories = Array.from(
-        new Set(prod.map((p) => p.category).filter(Boolean)),
-      );
-    });
-    builder.addCase(fetchProduct.pending, (state) => {
-      state.isLoading = true;
-    });
-    builder.addCase(fetchProduct.rejected, (state, action) => {
-      console.log("Error", action.payload);
-      state.isError = true;
-    });
+    builder
+      .addCase(fetchProduct.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(fetchProduct.fulfilled, (state, action) => {
+        state.products = action.payload;
+        state.categories = [...new Set(action.payload.map((p) => p.category))];
+        state.isLoading = false;
+      })
+      .addCase(fetchProduct.rejected, (state) => {
+        state.isError = true;
+        state.isLoading = false;
+      });
   },
 });
-export const { filterByCategory, filterByInput } = ProductSlice.actions;
+
 export default ProductSlice.reducer;

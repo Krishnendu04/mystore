@@ -96,7 +96,10 @@ export default function Navbar() {
 
           {/* Mobile Menu */}
           {isMobile && (
-            <IconButton color="inherit" onClick={() => setMobileDrawerOpen(true)}>
+            <IconButton
+              color="inherit"
+              onClick={() => setMobileDrawerOpen(true)}
+            >
               <MenuIcon />
             </IconButton>
           )}

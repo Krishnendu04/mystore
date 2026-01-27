@@ -7,6 +7,8 @@ import About from "../Pages/About";
 import Contact from "../Pages/Contact";
 import Checkout from "../Pages/Checkout";
 import ProtectedCheckout from "../components/ProtectedCheckout";
+import Category from "../Pages/Category";
+import Deals from "../Pages/Deals";
 export default function AppRoutes() {
   return (
     <Routes>
@@ -23,6 +25,8 @@ export default function AppRoutes() {
           </ProtectedCheckout>
         }
       />
+      <Route path="/category" element={<Category/>}/>
+      <Route path="/deals" element={<Deals/>}/>
     </Routes>
   );
 }

@@ -1,275 +1,303 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProduct } from "../redux/slices/ProductSlice";
-import { useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import useDebounce from "../hooks/useDebounce";
 
 import {
   Box,
-  Paper,
   Table,
-  TableBody,
-  TableCell,
-  TableContainer,
   TableHead,
   TableRow,
+  TableCell,
+  TableBody,
   TablePagination,
   TextField,
-  Typography,
   MenuItem,
+  Paper,
   CircularProgress,
   TableSortLabel,
+  Button,
+  Typography,
 } from "@mui/material";
-import useDebounce from "../hooks/useDebounce";
 
-const Products = () => {
+export default function Products() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isLoading, isError, filtered, categories } = useSelector(
-    (state) => state.product,
+  const { products, categories, isLoading, isError } = useSelector(
+    (s) => s.product
   );
 
-  const [search, setSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  // null = no sorting, "asc" | "desc" = active sorting
-  const [priceOrder, setPriceOrder] = useState(null);
+  const search = searchParams.get("q") || "";
+  const category = searchParams.get("cat") || "all";
+  const priceRange = searchParams.get("price") || "all";
+
+  const pageFromUrl = parseInt(searchParams.get("page")) || 1;
+  const page = Math.max(0, pageFromUrl - 1);
+
+  const limit = [10, 20, 50].includes(Number(searchParams.get("limit")))
+    ? Number(searchParams.get("limit"))
+    : 10;
+
+  const sort = searchParams.get("sort");
+  const priceOrder =
+    sort === "price_asc" ? "asc" : sort === "price_desc" ? "desc" : null;
 
   useEffect(() => {
     dispatch(fetchProduct());
   }, [dispatch]);
 
-  // Toggle price sorting
-  const handlePriceSort = () => {
-    setPriceOrder((prev) => {
-      if (prev === null) return "asc";
-      if (prev === "asc") return "desc";
-      return null; // back to unsorted
+  const updateParams = (updates) => {
+    const params = new URLSearchParams(searchParams);
+    Object.entries(updates).forEach(([k, v]) => {
+      if (k === "page") {
+        const pageValue = Number(v) + 1;
+        if (pageValue <= 1) params.delete("page");
+        else params.set("page", pageValue);
+        return;
+      }
+      if (v === null || v === "" || v === "all") params.delete(k);
+      else params.set(k, v);
     });
+    setSearchParams(params, { replace: true });
   };
 
-  // used custom useDebounce hook to handle search input, to avoid filtering on every keystroke.
-  const debouncedSearch=useDebounce(search,300);
-  // Search + Category filter (NO sorting here)
-  const filteredData = useMemo(() => {
-    return filtered.filter((item) => {
-      const matchSearch = item.title
-        .toLowerCase()
-        .includes(debouncedSearch.toLowerCase());
+  const clearAll = () => setSearchParams({}, { replace: true });
+  const debouncedSearch = useDebounce(search, 300);
 
-      const matchCategory =
-        selectedCategory === "all" || item.category === selectedCategory;
+  // ---------------- Filtering ONLY ----------------
+  const filtered = useMemo(() => {
+    const getPrice = (p) => p.discountedPrice || p.price;
+    const isInPriceRange = (price) => {
+      switch (priceRange) {
+        case "0-50":
+          return price <= 50;
+        case "50-100":
+          return price > 50 && price <= 100;
+        case "100-500":
+          return price > 100 && price <= 500;
+        case "500+":
+          return price > 500;
+        default:
+          return true;
+      }
+    };
 
-      return matchSearch && matchCategory;
-    });
-  }, [filtered, debouncedSearch, selectedCategory]);
+    let data = products;
 
-  // Pagination + Page-wise conditional sorting
-  const paginatedData = useMemo(() => {
-    const pageData = filteredData.slice(
-      page * rowsPerPage,
-      page * rowsPerPage + rowsPerPage,
-    );
+    if (category !== "all") {
+      data = data.filter((p) => p.category === category);
+    }
 
-    // First load => keep API order (ID ascending)
-    if (!priceOrder) return pageData;
+    if (debouncedSearch) {
+      data = data.filter((p) =>
+        p.title.toLowerCase().includes(debouncedSearch.toLowerCase())
+      );
+    }
 
-    // After clicking Price => sort only this page
-    return [...pageData].sort((a, b) =>
-      priceOrder === "asc" ? a.price - b.price : b.price - a.price,
-    );
-  }, [filteredData, page, rowsPerPage, priceOrder]);
+    if (priceRange !== "all") {
+      data = data.filter((p) => isInPriceRange(getPrice(p)));
+    }
 
+    return data;
+  }, [products, category, debouncedSearch, priceRange]);
+
+  // ---------------- Pagination + Page Sorting ----------------
+  const paginated = useMemo(() => {
+    const start = page * limit;
+    let pageData = filtered.slice(start, start + limit);
+
+    if (priceOrder) {
+      pageData = [...pageData].sort((a, b) => {
+        const getPrice = (p) => p.discountedPrice || p.price;
+        return priceOrder === "asc"
+          ? getPrice(a) - getPrice(b)
+          : getPrice(b) - getPrice(a);
+      });
+    }
+
+    return pageData;
+  }, [filtered, page, limit, priceOrder]);
+
+  // ---------------- Loading ----------------
   if (isLoading)
     return (
       <Box
         sx={{
-          minHeight: "50vh",
+          minHeight: "60vh",
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
         }}
       >
-        <CircularProgress size={60} color="primary" />
+        <CircularProgress size={50} />
       </Box>
     );
 
-  if (isError) return <p>Error...</p>;
+  if (isError)
+    return (
+      <Box
+        sx={{
+          minHeight: "60vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Typography color="error">Error loading products</Typography>
+      </Box>
+    );
 
   return (
-    <Box p={{ xs: 1, md: 3 }}>
-      <Typography variant="h5" mb={2} fontWeight="bold">
-        Products
-      </Typography>
-
-      {/* Filters */}
+    <Box p={{ xs: 1, md: 3 }} sx={{ minHeight: "60vh" }}>
+      {/* ---------------- Filters ---------------- */}
       <Box display="flex" gap={2} mb={2} flexWrap="wrap" alignItems="center">
         <TextField
-          label="Search by title"
           size="small"
-          sx={{ width: 280 }}
+          label="Search by title"
           value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setPage(0);
-          }}
+          onChange={(e) => updateParams({ q: e.target.value, page: 0 })}
+          sx={{ width: 260 }}
         />
 
         <TextField
           select
-          label="Category"
           size="small"
-          sx={{ width: 220 }}
-          value={selectedCategory}
-          onChange={(e) => {
-            setSelectedCategory(e.target.value);
-            setPage(0);
-          }}
+          label="Category"
+          value={category}
+          onChange={(e) => updateParams({ cat: e.target.value, page: 0 })}
+          sx={{ width: 200 }}
         >
           <MenuItem value="all">All Categories</MenuItem>
-          {categories?.map((cat) => (
-            <MenuItem key={cat} value={cat}>
-              {cat}
+          {categories.map((c) => (
+            <MenuItem key={c} value={c}>
+              {c}
             </MenuItem>
           ))}
         </TextField>
+
+        <TextField
+          select
+          size="small"
+          label="Price Range"
+          value={priceRange}
+          onChange={(e) => updateParams({ price: e.target.value, page: 0 })}
+          sx={{ width: 180 }}
+        >
+          <MenuItem value="all">All Prices</MenuItem>
+          <MenuItem value="0-50">Under $50</MenuItem>
+          <MenuItem value="50-100">$50 - $100</MenuItem>
+          <MenuItem value="100-500">$100 - $500</MenuItem>
+          <MenuItem value="500+">$500+</MenuItem>
+        </TextField>
+
+        {(search || category !== "all" || priceRange !== "all" || priceOrder) && (
+          <Button variant="outlined" size="small" color="error" onClick={clearAll}>
+            Clear All
+          </Button>
+        )}
       </Box>
 
-      {/* Table */}
-      <TableContainer
-        component={Paper}
-        sx={{
-          height: 400,
-          borderRadius: 2,
-          boxShadow: 3,
-          overflowX: "auto",
-        }}
-      >
-        <Table stickyHeader size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell
-                sx={{
-                  width: 70,
-                  fontWeight: "bold",
-                  position: "sticky",
-                  left: 0,
-                  backgroundColor: "#fff",
-                  zIndex: 3,
-                }}
-              >
-                ID
-              </TableCell>
-
-              <TableCell sx={{ width: 220, fontWeight: "bold" }}>
-                Title
-              </TableCell>
-
-              <TableCell sx={{ width: 160, fontWeight: "bold" }}>
-                Category
-              </TableCell>
-
-              {/* Sortable Price */}
-              <TableCell sx={{ width: 100, fontWeight: "bold" }}>
-                <TableSortLabel
-                  active={Boolean(priceOrder)}
-                  direction={priceOrder === "desc" ? "desc" : "asc"}
-                  onClick={handlePriceSort}
-                >
-                  Price
-                </TableSortLabel>
-              </TableCell>
-
-              <TableCell sx={{ width: 350, fontWeight: "bold" }}>
-                Description
-              </TableCell>
-            </TableRow>
-          </TableHead>
-
-          <TableBody>
-            {paginatedData.map((item) => (
-              <TableRow
-                key={item.id}
-                hover
-                sx={{ cursor: "pointer" }}
-                onClick={() => navigate(`/products/${item.id}`)}
-              >
+      {/* ---------------- Table ---------------- */}
+      <Paper sx={{ width: "100%", overflow: "hidden" }}>
+        <Box sx={{ overflowX: "auto" }}>
+          <Table size="small" sx={{ tableLayout: "fixed", minWidth: 1100 }}>
+            <TableHead>
+              <TableRow>
                 <TableCell
+                  width={80}
                   sx={{
                     position: "sticky",
                     left: 0,
-                    backgroundColor: "#fff",
-                    zIndex: 2,
+                    background: "#fff",
+                    zIndex: 3,
                   }}
                 >
-                  {item.id}
+                  ID
                 </TableCell>
-
-                <TableCell
-                  sx={{
-                    maxWidth: 220,
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  }}
-                >
-                  {item.title}
+                <TableCell width={220}>Title</TableCell>
+                <TableCell width={160}>Category</TableCell>
+                <TableCell width={120}>
+                  <TableSortLabel
+                    active={!!priceOrder}
+                    direction={priceOrder === "desc" ? "desc" : "asc"}
+                    onClick={() =>
+                      updateParams({
+                        sort: !priceOrder
+                          ? "price_asc"
+                          : priceOrder === "asc"
+                          ? "price_desc"
+                          : null,
+                      })
+                    }
+                  >
+                    Price
+                  </TableSortLabel>
                 </TableCell>
-
-                <TableCell>{item.category}</TableCell>
-
-                <TableCell>${item.price}</TableCell>
-
-                <TableCell
-                  sx={{
-                    maxWidth: 350,
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  }}
-                  title={item.description}
-                >
-                  {item.description}
-                </TableCell>
+                <TableCell width={350}>Description</TableCell>
               </TableRow>
-            ))}
+            </TableHead>
 
-            {paginatedData.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={5} align="center">
-                  No products found
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            <TableBody>
+              {paginated.map((p) => (
+                <TableRow
+                  key={p.id}
+                  hover
+                  sx={{ cursor: "pointer" }}
+                  onClick={() => navigate(`/products/${p.id}`)}
+                >
+                  <TableCell
+                    sx={{
+                      position: "sticky",
+                      left: 0,
+                      background: "#fff",
+                      zIndex: 2,
+                    }}
+                  >
+                    {p.id}
+                  </TableCell>
+                  <TableCell>{p.title}</TableCell>
+                  <TableCell>{p.category}</TableCell>
+                  <TableCell>${p.discountedPrice || p.price}</TableCell>
+                  <TableCell
+                    sx={{
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {p.description}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Box>
 
-      {/* Pagination */}
-      <Box
-        sx={{
-          width: "100%",
-          overflowX: "hidden",
-          display: "flex",
-          justifyContent: { xs: "center", md: "right" },
-        }}
-      >
-        <TablePagination
-          component="div"
-          rowsPerPageOptions={[10, 20, 50]}
-          count={filteredData.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={(e, newPage) => setPage(newPage)}
-          onRowsPerPageChange={(e) => {
-            setRowsPerPage(parseInt(e.target.value, 10));
-            setPage(0);
+        <Box
+          sx={{
+            px: 2,
+            py: 1,
+            borderTop: "1px solid #e0e0e0",
+            display: "flex",
+            justifyContent: { xs: "center", md: "flex-end" },
           }}
-        />
-      </Box>
+        >
+          <TablePagination
+            component="div"
+            rowsPerPageOptions={[10, 20, 50]}
+            count={filtered.length}
+            rowsPerPage={limit}
+            page={page}
+            onPageChange={(e, p) => updateParams({ page: p })}
+            onRowsPerPageChange={(e) =>
+              updateParams({ limit: e.target.value, page: 0 })
+            }
+          />
+        </Box>
+      </Paper>
     </Box>
   );
-};
-
-export default Products;
+}
