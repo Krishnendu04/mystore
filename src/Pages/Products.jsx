@@ -278,8 +278,6 @@ export default function Products() {
 
         <Box
           sx={{
-            px: 2,
-            py: 1,
             borderTop: "1px solid #e0e0e0",
             display: "flex",
             justifyContent: { xs: "center", md: "flex-end" },

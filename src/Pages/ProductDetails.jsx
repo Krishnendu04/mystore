@@ -132,12 +132,25 @@ export default function ProductDetails() {
           )}
 
           {/* Add to Cart uses discounted price */}
-          <AddToCartButton
-            product={{
-              ...product,
-              price: hasDiscount ? product.discountedPrice : product.price,
+          <Box
+            sx={{
+              width: {
+                xs: "100%", // Mobile → full width
+                sm: "80%", // Small tablets
+                md: "60%", // Laptops
+                lg: "18vw", // Large screens (your original)
+              },
+              maxWidth: 220, // Prevents it from becoming huge
+              minWidth: 140, // Prevents it from becoming too small
             }}
-          />
+          >
+            <AddToCartButton
+              product={{
+                ...product,
+                price: hasDiscount ? product.discountedPrice : product.price,
+              }}
+            />
+          </Box>
         </Box>
       </Paper>
 
