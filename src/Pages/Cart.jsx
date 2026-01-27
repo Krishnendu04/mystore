@@ -20,10 +20,11 @@ import RemoveIcon from "@mui/icons-material/Remove";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
 
+const CART_MAX_HEIGHT = "70vh";
+
 const Cart = ({ onClose }) => {
   const cartItems = useSelector((state) => state.cart.cartItems);
   const dispatch = useDispatch();
-
   const navigate = useNavigate();
 
   const totalPrice = cartItems.reduce(
@@ -32,8 +33,15 @@ const Cart = ({ onClose }) => {
   );
 
   return (
-    <Box sx={{ width: "100%" }}>
-      {/* Header */}
+    <Box
+      sx={{
+        width: "100%",
+        maxHeight: CART_MAX_HEIGHT,
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      {/* ================= HEADER ================= */}
       <Box
         display="flex"
         justifyContent="space-between"
@@ -42,102 +50,120 @@ const Cart = ({ onClose }) => {
       >
         <Typography fontWeight="bold">My Cart</Typography>
 
-        {/* Close Cart */}
         <IconButton size="small" onClick={onClose}>
           <CloseIcon />
         </IconButton>
       </Box>
 
-      <Divider sx={{ mb: 1 }} />
+      <Divider />
 
-      {/* Empty Cart */}
-      {cartItems.length === 0 && (
-        <Typography align="center" color="text.secondary" py={2}>
-          Cart is empty
-        </Typography>
-      )}
+      {/* ================= SCROLLABLE BODY ================= */}
+      <Box
+        sx={{
+          flex: 1,
+          overflowY: "auto",
+          pr: 1,
+          mt: 1,
+        }}
+      >
+        {cartItems.length === 0 && (
+          <Typography align="center" color="text.secondary" py={3}>
+            Cart is empty
+          </Typography>
+        )}
 
-      {/* Cart Items */}
-      {cartItems.map((item) => (
-        <Box key={item.id} py={1}>
+        {cartItems.map((item) => (
+          <Box key={item.id} py={1}>
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+            >
+              {/* Product Info */}
+              <Box sx={{ maxWidth: "60%" }}>
+                <Typography fontSize={14} fontWeight={600} noWrap>
+                  {item.title}
+                </Typography>
+                <Typography fontSize={13} color="text.secondary">
+                  ${item.price}
+                </Typography>
+              </Box>
+
+              {/* Quantity Controls */}
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <IconButton
+                  size="small"
+                  onClick={() => dispatch(removeFromCart(item.id))}
+                >
+                  <RemoveIcon fontSize="small" />
+                </IconButton>
+
+                <Typography fontWeight="bold">
+                  {item.quantity}
+                </Typography>
+
+                <IconButton
+                  size="small"
+                  onClick={() => dispatch(addToCart(item))}
+                >
+                  <AddIcon fontSize="small" />
+                </IconButton>
+              </Stack>
+            </Stack>
+
+            <Divider sx={{ mt: 1 }} />
+          </Box>
+        ))}
+      </Box>
+
+      {/* ================= FIXED FOOTER ================= */}
+      {cartItems.length > 0 && (
+        <Box
+          sx={{
+            borderTop: "1px solid #e0e0e0",
+            pt: 1.5,
+            mt: 1,
+          }}
+        >
           <Stack
             direction="row"
-            justifyContent="space-between"
             alignItems="center"
+            justifyContent="space-between"
+            spacing={1}
+            sx={{
+              flexWrap: "nowrap",
+            }}
           >
-            {/* Product Info */}
-            <Box sx={{ maxWidth: "65%" }}>
-              <Typography fontSize={14} fontWeight={600} noWrap>
-                {item.title}
-              </Typography>
-              <Typography fontSize={13} color="text.secondary">
-                $ {item.price}
-              </Typography>
-            </Box>
+            {/* Total */}
+            <Typography fontWeight="bold" fontSize={{ xs: 14, sm: 16 }}>
+              Total: ${totalPrice.toFixed(2)}
+            </Typography>
 
-            {/* Quantity Controls */}
-            <Stack direction="row" alignItems="center" spacing={1}>
-              <IconButton
+            {/* Buttons */}
+            <Stack direction="row" spacing={1}>
+              <Button
                 size="small"
-                onClick={() => dispatch(removeFromCart(item.id))}
+                variant="contained"
+                onClick={() => {
+                  onClose();
+                  navigate("/checkout");
+                }}
               >
-                <RemoveIcon fontSize="small" />
-              </IconButton>
+                Buy Now
+              </Button>
 
-              <Typography fontWeight="bold">{item.quantity}</Typography>
-
-              <IconButton
+              <Button
                 size="small"
-                onClick={() => dispatch(addToCart(item))}
+                variant="outlined"
+                color="error"
+                startIcon={<DeleteIcon />}
+                onClick={() => dispatch(clearCart())}
               >
-                <AddIcon fontSize="small" />
-              </IconButton>
+                Clear
+              </Button>
             </Stack>
           </Stack>
-
-          <Divider sx={{ mt: 1 }} />
         </Box>
-      ))}
-
-      {/* Footer */}
-      {cartItems.length > 0 && (
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-          flexWrap="wrap"
-          spacing={1}
-        >
-          <Typography fontWeight="bold">
-            Total: $ {totalPrice.toFixed(2)}
-          </Typography>
-
-          <Stack direction="row" spacing={1}>
-            {/* Buy Now Button */}
-            <Button
-              size="small"
-              variant="contained"
-              color="primary"
-              onClick={() => {
-                onClose(); // close cart popover
-                navigate("/checkout"); // go to checkout page
-              }}
-            >
-              Buy Now
-            </Button>
-
-            {/* Clear Button */}
-            <Button
-              size="small"
-              color="error"
-              variant="outlined"
-              startIcon={<DeleteIcon />}
-              onClick={() => dispatch(clearCart())}
-            >
-              Clear
-            </Button>
-          </Stack>
-        </Stack>
       )}
     </Box>
   );

@@ -22,7 +22,25 @@ export const fetchProduct = createAsyncThunk(
         discountedPrice,
       };
     });
-  }
+  },
+  {
+    condition: (_, { getState }) => {
+      const { lastFetched, isLoading } = getState().product;
+
+      // Prevent parallel calls
+      if (isLoading) return false;
+
+      const TEN_MINUTES = 10 * 60 * 1000;
+      const now = Date.now();
+
+      // If data fetched within last 10 minutes → skip API
+      if (now - lastFetched < TEN_MINUTES) {
+        return false;
+      }
+
+      return true;
+    },
+  },
 );
 
 const ProductSlice = createSlice({
@@ -32,6 +50,7 @@ const ProductSlice = createSlice({
     categories: [],
     isLoading: false,
     isError: false,
+    lastFetched: 0,
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -43,6 +62,7 @@ const ProductSlice = createSlice({
         state.products = action.payload;
         state.categories = [...new Set(action.payload.map((p) => p.category))];
         state.isLoading = false;
+        state.lastFetched = Date.now();
       })
       .addCase(fetchProduct.rejected, (state) => {
         state.isError = true;

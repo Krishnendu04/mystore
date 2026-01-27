@@ -13,10 +13,12 @@ import {
   ListItem,
   ListItemText,
   ListItemButton,
-  Popover,
   Badge,
+  Popper,
+  Paper,
+  ClickAwayListener,
   useTheme,
-  useMediaQuery,
+  useMediaQuery
 } from "@mui/material";
 
 import StorefrontIcon from "@mui/icons-material/Storefront";
@@ -28,32 +30,36 @@ import Cart from "../../Pages/Cart";
 
 export default function Navbar() {
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
-  const [cartAnchorEl, setCartAnchorEl] = useState(null); //used to store the DOM element ShoppingCartIcon and the cart popover will display below the cart icon.
+  const [cartOpen, setCartOpen] = useState(false);
+  const [cartAnchorEl, setCartAnchorEl] = useState(null);
+
   const navigate = useNavigate();
   const cartItems = useSelector((state) => state.cart.cartItems);
-
-  const totalQty = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const totalQty = cartItems.reduce((s, i) => s + i.quantity, 0);
 
   const navLinks = [
     { label: "Home", path: "/" },
     { label: "Products", path: "/products" },
     { label: "About", path: "/about" },
-    { label: "Contact", path: "/contact" },
+    { label: "Contact", path: "/contact" }
   ];
 
-  // Screen size detection
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
-  // Drawer can only be open on mobile
-  const drawerOpen = isMobile && mobileDrawerOpen;
+  const handleCartClick = (e) => {
+    setCartAnchorEl(e.currentTarget);
+    setCartOpen((prev) => !prev);
+  };
+
+  const closeCart = () => {
+    setCartOpen(false);
+  };
 
   return (
     <>
-      {/* Navbar */}
       <AppBar position="sticky">
         <Toolbar>
-          {/* Logo */}
           <Box
             display="flex"
             alignItems="center"
@@ -64,7 +70,6 @@ export default function Navbar() {
             <Typography variant="h6">MyStore</Typography>
           </Box>
 
-          {/* Desktop Menu */}
           <Box sx={{ display: { xs: "none", md: "flex" }, ml: 3 }}>
             {navLinks.map((item) => (
               <Button
@@ -74,7 +79,7 @@ export default function Navbar() {
                 to={item.path}
                 sx={{
                   textTransform: "none",
-                  "&.active": { borderBottom: "2px solid white" },
+                  "&.active": { borderBottom: "2px solid white" }
                 }}
               >
                 {item.label}
@@ -84,41 +89,29 @@ export default function Navbar() {
 
           <Box sx={{ flexGrow: 1 }} />
 
-          {/* Cart */}
-          <Badge
-            badgeContent={totalQty}
-            color="secondary"
-            sx={{ cursor: "pointer", mr: 2 }}
-            onClick={(e) => setCartAnchorEl(e.currentTarget)}
-          >
-            <ShoppingCartIcon />
-          </Badge>
+          {/* Cart button */}
+          <IconButton color="inherit" onClick={handleCartClick}>
+            <Badge badgeContent={totalQty} color="secondary">
+              <ShoppingCartIcon />
+            </Badge>
+          </IconButton>
 
-          {/* Mobile Menu */}
           {isMobile && (
-            <IconButton
-              color="inherit"
-              onClick={() => setMobileDrawerOpen(true)}
-            >
+            <IconButton color="inherit" onClick={() => setMobileDrawerOpen(true)}>
               <MenuIcon />
             </IconButton>
           )}
         </Toolbar>
       </AppBar>
 
-      {/* Mobile Sidebar */}
+      {/* Mobile menu */}
       <Drawer
         anchor="right"
-        open={drawerOpen}
+        open={mobileDrawerOpen}
         onClose={() => setMobileDrawerOpen(false)}
-        variant="temporary"
-        ModalProps={{ keepMounted: true }}
-        sx={{
-          display: { xs: "block", md: "none" },
-          "& .MuiDrawer-paper": { width: 250 },
-        }}
+        sx={{ "& .MuiDrawer-paper": { width: 250 } }}
       >
-        <Box sx={{ width: 250 }}>
+        <Box>
           <Box display="flex" justifyContent="flex-end" p={1}>
             <IconButton onClick={() => setMobileDrawerOpen(false)}>
               <CloseIcon />
@@ -141,24 +134,28 @@ export default function Navbar() {
         </Box>
       </Drawer>
 
-      {/* Cart Popover */}
-      <Popover
-        open={Boolean(cartAnchorEl)}
+      {/* Cart dropdown (Popper = no aria-hidden, no Modal, no warning) */}
+      <Popper
+        open={cartOpen}
         anchorEl={cartAnchorEl}
-        onClose={() => setCartAnchorEl(null)}
-        disableScrollLock //when this popupopens Material UI locks body scrolling and adds padding-right to the body to prevent this we use disableScrollLock
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-        transformOrigin={{ vertical: "top", horizontal: "right" }}
-        PaperProps={{
-          sx: {
-            p: 2,
-            width: { xs: 300, sm: 340 },
-            borderRadius: 3,
-          },
-        }}
+        placement="bottom-end"
+        disablePortal
+        sx={{ zIndex: 1300 }}
       >
-        <Cart onClose={() => setCartAnchorEl(null)} />
-      </Popover>
+        <ClickAwayListener onClickAway={closeCart}>
+          <Paper
+            elevation={8}
+            sx={{
+              p: 2,
+              width: { xs: 300, sm: 340 },
+              borderRadius: 3,
+              mt: 1
+            }}
+          >
+            <Cart onClose={closeCart} />
+          </Paper>
+        </ClickAwayListener>
+      </Popper>
     </>
   );
 }
