@@ -111,7 +111,6 @@ const Cart = ({ onClose }) => {
               </Stack>
             </Stack>
 
-            <Divider sx={{ mt: 1 }} />
           </Box>
         ))}
       </Box>

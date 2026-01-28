@@ -2,7 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.jsx";
-import { ThemeProvider } from "@emotion/react";
+import { ThemeProvider } from "@mui/material";
 import theme from "./theme/muiTheme.js";
 import Navbar from "./components/Navbar/Navbar.jsx";
 import Footer from "./components/Footer/Footer.jsx";
@@ -15,7 +15,7 @@ createRoot(document.getElementById("root")).render(
     <Provider store={store}>
       <ThemeProvider theme={theme}>
         <BrowserRouter>
-        <ScrollToTop/>
+          <ScrollToTop />
           <Navbar />
           <App />
           <Footer />

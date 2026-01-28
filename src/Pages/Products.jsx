@@ -202,6 +202,7 @@ export default function Products() {
           <TextField
             select
             size="small"
+            inputProps={{ MenuProps: { disableScrollLock: true } }}
             label="Category"
             value={category}
             onChange={(e) => updateParams({ cat: e.target.value, page: 0 })}
@@ -237,6 +238,7 @@ export default function Products() {
         >
           <TextField
             select
+            inputProps={{ MenuProps: { disableScrollLock: true } }}
             size="small"
             label="Price Range"
             value={priceRange}
@@ -389,6 +391,13 @@ export default function Products() {
             onRowsPerPageChange={(e) =>
               updateParams({ limit: e.target.value, page: 0 })
             }
+            slotProps={{
+              select: {
+                MenuProps: {
+                  disableScrollLock: true,
+                },
+              },
+            }}
           />
         </Box>
       </Paper>
