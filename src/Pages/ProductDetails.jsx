@@ -135,13 +135,13 @@ export default function ProductDetails() {
           <Box
             sx={{
               width: {
-                xs: "100%", // Mobile → full width
-                sm: "80%", // Small tablets
-                md: "60%", // Laptops
-                lg: "18vw", // Large screens (your original)
+                xs: "100%", 
+                sm: "80%", 
+                md: "60%", 
+                lg: "18vw", 
               },
-              maxWidth: 220, // Prevents it from becoming huge
-              minWidth: 140, // Prevents it from becoming too small
+              maxWidth: 220, 
+              minWidth: 140, 
             }}
           >
             <AddToCartButton

@@ -70,7 +70,7 @@ export default function Products() {
   const clearAll = () => setSearchParams({}, { replace: true });
   const debouncedSearch = useDebounce(search, 300);
 
-  // ---------------- Filtering ONLY ----------------
+  // Filtering ONLY
   const filtered = useMemo(() => {
     const getPrice = (p) => p.discountedPrice || p.price;
     const isInPriceRange = (price) => {
@@ -107,7 +107,7 @@ export default function Products() {
     return data;
   }, [products, category, debouncedSearch, priceRange]);
 
-  // ---------------- Pagination + Page Sorting ----------------
+  // Pagination + Page Sorting
   const paginated = useMemo(() => {
     const start = page * limit;
     let pageData = filtered.slice(start, start + limit);
@@ -124,7 +124,7 @@ export default function Products() {
     return pageData;
   }, [filtered, page, limit, priceOrder]);
 
-  // ---------------- Loading ----------------
+  // Loading
   if (isLoading)
     return (
       <Box
@@ -155,7 +155,7 @@ export default function Products() {
 
   return (
     <Box p={{ xs: 1, md: 3 }} sx={{ minHeight: "60vh" }}>
-      {/* ---------------- Filters ---------------- */}
+      {/* Filters */}
       <Box
         display="flex"
         gap={2}
@@ -286,7 +286,7 @@ export default function Products() {
         )}
       </Box>
 
-      {/* ---------------- Table ---------------- */}
+      {/* Table */}
       <Paper sx={{ width: "100%", overflow: "hidden" }}>
         <Box sx={{ overflowX: "auto" }}>
           <Table size="small" sx={{ tableLayout: "fixed", minWidth: 1100 }}>

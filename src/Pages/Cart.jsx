@@ -41,7 +41,7 @@ const Cart = ({ onClose }) => {
         flexDirection: "column",
       }}
     >
-      {/* ================= HEADER ================= */}
+      {/* HEADER */}
       <Box
         display="flex"
         justifyContent="space-between"
@@ -57,7 +57,7 @@ const Cart = ({ onClose }) => {
 
       <Divider />
 
-      {/* ================= SCROLLABLE BODY ================= */}
+      {/* SCROLLABLE BODY */}
       <Box
         sx={{
           flex: 1,
@@ -115,7 +115,7 @@ const Cart = ({ onClose }) => {
         ))}
       </Box>
 
-      {/* ================= FIXED FOOTER ================= */}
+      {/* FIXED FOOTER */}
       {cartItems.length > 0 && (
         <Box
           sx={{

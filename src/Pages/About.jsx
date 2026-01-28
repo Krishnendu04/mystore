@@ -39,8 +39,8 @@ const About = () => {
           alt="Our Story"
           style={{
             width: "100%",
-            maxWidth: "1200px", // optional max width
-            height: "auto", // maintain aspect ratio
+            maxWidth: "1200px", // max width
+            height: "auto", // aspect ratio
             display: "block",
             objectFit: "contain", // full image visible
           }}

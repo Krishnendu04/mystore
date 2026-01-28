@@ -2,41 +2,32 @@ import React, { useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProduct } from "../redux/slices/ProductSlice";
 import { useNavigate } from "react-router-dom";
-import { Box, Typography, CircularProgress, Paper, Chip } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Paper,
+  Chip,
+  Skeleton,
+} from "@mui/material";
 import AddToCartButton from "../components/AddToCartButton";
 import { DISCOUNT_MAP } from "../config/discounts";
 
 const Deals = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { products, isLoading, isError } = useSelector((state) => state.product);
+  const { products, isLoading, isError } = useSelector(
+    (state) => state.product
+  );
 
   useEffect(() => {
     if (!products.length) dispatch(fetchProduct());
   }, [dispatch, products.length]);
 
-  /**
-   * Only products that exist in DISCOUNT_MAP
-   */
   const dealProducts = useMemo(() => {
     return products.filter((p) => DISCOUNT_MAP[p.id]);
   }, [products]);
 
-  if (isLoading) {
-    return (
-      <Box
-        sx={{
-          minHeight: "60vh",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <CircularProgress size={50} />
-      </Box>
-    );
-  }
-
+  /* ERROR STATE */
   if (isError) {
     return (
       <Box
@@ -69,89 +60,130 @@ const Deals = () => {
           gap: 2,
         }}
       >
-        {dealProducts.map((product) => (
-          <Paper
-            key={product.id}
-            elevation={3}
-            sx={{
-              borderRadius: 2,
-              overflow: "hidden",
-              display: "flex",
-              flexDirection: "column",
-              position: "relative",
-              transition: "0.3s",
-              "&:hover": { boxShadow: 6, transform: "scale(1.02)" },
-            }}
-          >
-            {/* Discount badge */}
-            <Chip
-              label={`${product.discount}% OFF`}
-              color="secondary"
-              size="small"
+        {/* SHIMMER UI */}
+        {isLoading &&
+          Array.from({ length: 10 }).map((_, index) => (
+            <Paper
+              key={index}
+              elevation={3}
               sx={{
-                position: "absolute",
-                top: 8,
-                left: 8,
-                zIndex: 2,
-                fontWeight: "bold",
-              }}
-            />
-
-            {/* Image */}
-            <Box
-              onClick={() => navigate(`/products/${product.id}`)}
-              sx={{
-                width: "100%",
-                aspectRatio: "1 / 1",
-                backgroundImage: `url(${product.thumbnail})`,
-                backgroundSize: "contain",
-                backgroundRepeat: "no-repeat",
-                backgroundPosition: "center",
-                bgcolor: "#fafafa",
-                cursor: "pointer",
-              }}
-            />
-
-            {/* Info */}
-            <Box
-              sx={{
-                p: 1.5,
+                borderRadius: 2,
+                overflow: "hidden",
                 display: "flex",
                 flexDirection: "column",
-                flexGrow: 1,
-                gap: 0.5,
               }}
             >
-              <Typography fontWeight="bold" noWrap title={product.title}>
-                {product.title}
-              </Typography>
-
-              <Typography variant="body2" color="text.secondary">
-                {product.category}
-              </Typography>
-
-              <Box display="flex" alignItems="center" gap={1}>
-                <Typography fontWeight="bold" color="error">
-                  ${product.discountedPrice}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    textDecoration: "line-through",
-                    color: "text.secondary",
-                  }}
-                >
-                  ${product.price}
-                </Typography>
-              </Box>
-
-              {/* Add to cart uses discounted price */}
-              <AddToCartButton
-                product={{ ...product, price: product.discountedPrice }}
+              {/* Image shimmer */}
+              <Skeleton
+                variant="rectangular"
+                width="100%"
+                height={200}
+                sx={{ aspectRatio: "1 / 1" }}
               />
-            </Box>
-          </Paper>
-        ))}
+
+              {/* Content shimmer */}
+              <Box p={1.5}>
+                <Skeleton height={22} width="80%" />
+                <Skeleton height={18} width="50%" />
+
+                <Box display="flex" gap={1} mt={1}>
+                  <Skeleton height={24} width={60} />
+                  <Skeleton height={18} width={40} />
+                </Box>
+
+                <Skeleton
+                  variant="rectangular"
+                  height={36}
+                  sx={{ mt: 1, borderRadius: 1 }}
+                />
+              </Box>
+            </Paper>
+          ))}
+
+        {/* PRODUCTS */}
+        {!isLoading &&
+          dealProducts.map((product) => (
+            <Paper
+              key={product.id}
+              elevation={3}
+              sx={{
+                borderRadius: 2,
+                overflow: "hidden",
+                display: "flex",
+                flexDirection: "column",
+                position: "relative",
+                transition: "0.3s",
+                "&:hover": {
+                  boxShadow: { xs: 3, md: 6 },
+                  transform: { xs: "none", md: "scale(1.02)" },
+                },
+              }}
+            >
+              <Chip
+                label={`${product.discount}% OFF`}
+                color="secondary"
+                size="small"
+                sx={{
+                  position: "absolute",
+                  top: 8,
+                  left: 8,
+                  zIndex: 2,
+                  fontWeight: "bold",
+                }}
+              />
+
+              <Box
+                onClick={() => navigate(`/products/${product.id}`)}
+                sx={{
+                  width: "100%",
+                  aspectRatio: "1 / 1",
+                  backgroundImage: `url(${product.thumbnail})`,
+                  backgroundSize: "contain",
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "center",
+                  bgcolor: "#fafafa",
+                  cursor: "pointer",
+                }}
+              />
+
+              <Box
+                sx={{
+                  p: 1.5,
+                  display: "flex",
+                  flexDirection: "column",
+                  flexGrow: 1,
+                  gap: 0.5,
+                }}
+              >
+                <Typography fontWeight="bold" noWrap title={product.title}>
+                  {product.title}
+                </Typography>
+
+                <Typography variant="body2" color="text.secondary">
+                  {product.category}
+                </Typography>
+
+                <Box display="flex" alignItems="center" gap={1}>
+                  <Typography fontWeight="bold" color="error">
+                    ${product.discountedPrice}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      textDecoration: "line-through",
+                      color: "text.secondary",
+                    }}
+                  >
+                    ${product.price}
+                  </Typography>
+                </Box>
+
+                <AddToCartButton
+                  product={{ ...product, price: product.discountedPrice }}
+                />
+              </Box>
+            </Paper>
+          ))}
       </Box>
     </Box>
   );
