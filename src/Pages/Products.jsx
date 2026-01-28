@@ -3,6 +3,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchProduct } from "../redux/slices/ProductSlice";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import useDebounce from "../hooks/useDebounce";
+import ClearIcon from "@mui/icons-material/Clear";
+import InputAdornment from "@mui/material/InputAdornment";
+import IconButton from "@mui/material/IconButton";
 
 import {
   Box,
@@ -25,7 +28,7 @@ export default function Products() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { products, categories, isLoading, isError } = useSelector(
-    (s) => s.product
+    (s) => s.product,
   );
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -93,7 +96,7 @@ export default function Products() {
 
     if (debouncedSearch) {
       data = data.filter((p) =>
-        p.title.toLowerCase().includes(debouncedSearch.toLowerCase())
+        p.title.toLowerCase().includes(debouncedSearch.toLowerCase()),
       );
     }
 
@@ -153,48 +156,129 @@ export default function Products() {
   return (
     <Box p={{ xs: 1, md: 3 }} sx={{ minHeight: "60vh" }}>
       {/* ---------------- Filters ---------------- */}
-      <Box display="flex" gap={2} mb={2} flexWrap="wrap" alignItems="center">
-        <TextField
-          size="small"
-          label="Search by title"
-          value={search}
-          onChange={(e) => updateParams({ q: e.target.value, page: 0 })}
-          sx={{ width: 260 }}
-        />
-
-        <TextField
-          select
-          size="small"
-          label="Category"
-          value={category}
-          onChange={(e) => updateParams({ cat: e.target.value, page: 0 })}
-          sx={{ width: 200 }}
+      <Box
+        display="flex"
+        gap={2}
+        mb={2}
+        flexWrap="wrap"
+        alignItems={{ xs: "stretch", md: "center" }}
+        flexDirection={{ xs: "column", md: "row" }}
+      >
+        {/* 🔍 Search */}
+        <Box
+          display="flex"
+          alignItems="center"
+          gap={0.5}
+          width={{ xs: "100%", md: "auto" }}
         >
-          <MenuItem value="all">All Categories</MenuItem>
-          {categories.map((c) => (
-            <MenuItem key={c} value={c}>
-              {c}
-            </MenuItem>
-          ))}
-        </TextField>
+          <TextField
+            size="small"
+            label="Search by title"
+            value={search}
+            onChange={(e) => updateParams({ q: e.target.value, page: 0 })}
+            sx={{
+              width: { xs: "100%", md: 260 },
+            }}
+          />
 
-        <TextField
-          select
-          size="small"
-          label="Price Range"
-          value={priceRange}
-          onChange={(e) => updateParams({ price: e.target.value, page: 0 })}
-          sx={{ width: 180 }}
+          {search && (
+            <IconButton
+              size="small"
+              onClick={() => updateParams({ q: "", page: 0 })}
+              aria-label="Clear search"
+            >
+              <ClearIcon fontSize="small" />
+            </IconButton>
+          )}
+        </Box>
+
+        {/* 📂 Category */}
+        <Box
+          display="flex"
+          alignItems="center"
+          gap={0.5}
+          width={{ xs: "100%", md: "auto" }}
         >
-          <MenuItem value="all">All Prices</MenuItem>
-          <MenuItem value="0-50">Under $50</MenuItem>
-          <MenuItem value="50-100">$50 - $100</MenuItem>
-          <MenuItem value="100-500">$100 - $500</MenuItem>
-          <MenuItem value="500+">$500+</MenuItem>
-        </TextField>
+          <TextField
+            select
+            size="small"
+            label="Category"
+            value={category}
+            onChange={(e) => updateParams({ cat: e.target.value, page: 0 })}
+            sx={{
+              width: { xs: "100%", md: 200 },
+            }}
+          >
+            <MenuItem value="all">All Categories</MenuItem>
+            {categories.map((c) => (
+              <MenuItem key={c} value={c}>
+                {c}
+              </MenuItem>
+            ))}
+          </TextField>
 
-        {(search || category !== "all" || priceRange !== "all" || priceOrder) && (
-          <Button variant="outlined" size="small" color="error" onClick={clearAll}>
+          {category !== "all" && (
+            <IconButton
+              size="small"
+              onClick={() => updateParams({ cat: "all", page: 0 })}
+              aria-label="Clear category filter"
+            >
+              <ClearIcon fontSize="small" />
+            </IconButton>
+          )}
+        </Box>
+
+        {/* 💰 Price */}
+        <Box
+          display="flex"
+          alignItems="center"
+          gap={0.5}
+          width={{ xs: "100%", md: "auto" }}
+        >
+          <TextField
+            select
+            size="small"
+            label="Price Range"
+            value={priceRange}
+            onChange={(e) => updateParams({ price: e.target.value, page: 0 })}
+            sx={{
+              width: { xs: "100%", md: 180 },
+            }}
+          >
+            <MenuItem value="all">All Prices</MenuItem>
+            <MenuItem value="0-50">Under $50</MenuItem>
+            <MenuItem value="50-100">$50 - $100</MenuItem>
+            <MenuItem value="100-500">$100 - $500</MenuItem>
+            <MenuItem value="500+">$500+</MenuItem>
+          </TextField>
+
+          {priceRange !== "all" && (
+            <IconButton
+              size="small"
+              onClick={() => updateParams({ price: "all", page: 0 })}
+              aria-label="Clear price filter"
+            >
+              <ClearIcon fontSize="small" />
+            </IconButton>
+          )}
+        </Box>
+
+        {/* 🧹 Clear All */}
+        {(search ||
+          category !== "all" ||
+          priceRange !== "all" ||
+          priceOrder) && (
+          <Button
+            variant="outlined"
+            size="small"
+            color="error"
+            onClick={clearAll}
+            fullWidth
+            sx={{
+              alignSelf: { xs: "stretch", md: "center" },
+              width: { xs: "100%", md: "auto" },
+            }}
+          >
             Clear All
           </Button>
         )}
@@ -228,8 +312,8 @@ export default function Products() {
                         sort: !priceOrder
                           ? "price_asc"
                           : priceOrder === "asc"
-                          ? "price_desc"
-                          : null,
+                            ? "price_desc"
+                            : null,
                       })
                     }
                   >
@@ -241,37 +325,49 @@ export default function Products() {
             </TableHead>
 
             <TableBody>
-              {paginated.map((p) => (
-                <TableRow
-                  key={p.id}
-                  hover
-                  sx={{ cursor: "pointer" }}
-                  onClick={() => navigate(`/products/${p.id}`)}
-                >
+              {paginated.length === 0 ? (
+                <TableRow>
                   <TableCell
-                    sx={{
-                      position: "sticky",
-                      left: 0,
-                      background: "#fff",
-                      zIndex: 2,
-                    }}
+                    colSpan={5} // 👈 total number of columns
+                    align="center"
+                    sx={{ py: 4, color: "text.secondary" }}
                   >
-                    {p.id}
-                  </TableCell>
-                  <TableCell>{p.title}</TableCell>
-                  <TableCell>{p.category}</TableCell>
-                  <TableCell>${p.discountedPrice || p.price}</TableCell>
-                  <TableCell
-                    sx={{
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {p.description}
+                    No products found
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                paginated.map((p) => (
+                  <TableRow
+                    key={p.id}
+                    hover
+                    sx={{ cursor: "pointer" }}
+                    onClick={() => navigate(`/products/${p.id}`)}
+                  >
+                    <TableCell
+                      sx={{
+                        position: "sticky",
+                        left: 0,
+                        background: "#fff",
+                        zIndex: 2,
+                      }}
+                    >
+                      {p.id}
+                    </TableCell>
+                    <TableCell>{p.title}</TableCell>
+                    <TableCell>{p.category}</TableCell>
+                    <TableCell>${p.discountedPrice || p.price}</TableCell>
+                    <TableCell
+                      sx={{
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
+                      {p.description}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </Box>
