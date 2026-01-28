@@ -18,7 +18,7 @@ import {
   Paper,
   ClickAwayListener,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
 } from "@mui/material";
 
 import StorefrontIcon from "@mui/icons-material/Storefront";
@@ -41,7 +41,7 @@ export default function Navbar() {
     { label: "Home", path: "/" },
     { label: "Products", path: "/products" },
     { label: "About", path: "/about" },
-    { label: "Contact", path: "/contact" }
+    { label: "Contact", path: "/contact" },
   ];
 
   const theme = useTheme();
@@ -79,7 +79,7 @@ export default function Navbar() {
                 to={item.path}
                 sx={{
                   textTransform: "none",
-                  "&.active": { borderBottom: "2px solid white" }
+                  "&.active": { borderBottom: "2px solid white" },
                 }}
               >
                 {item.label}
@@ -97,7 +97,10 @@ export default function Navbar() {
           </IconButton>
 
           {isMobile && (
-            <IconButton color="inherit" onClick={() => setMobileDrawerOpen(true)}>
+            <IconButton
+              color="inherit"
+              onClick={() => setMobileDrawerOpen(true)}
+            >
               <MenuIcon />
             </IconButton>
           )}
@@ -149,7 +152,7 @@ export default function Navbar() {
               p: 2,
               width: { xs: 300, sm: 340 },
               borderRadius: 3,
-              mt: 1
+              mt: 1,
             }}
           >
             <Cart onClose={closeCart} />

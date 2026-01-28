@@ -164,7 +164,7 @@ export default function Products() {
         alignItems={{ xs: "stretch", md: "center" }}
         flexDirection={{ xs: "column", md: "row" }}
       >
-        {/* 🔍 Search */}
+        {/* Search */}
         <Box
           display="flex"
           alignItems="center"
@@ -192,7 +192,7 @@ export default function Products() {
           )}
         </Box>
 
-        {/* 📂 Category */}
+        {/* Category */}
         <Box
           display="flex"
           alignItems="center"
@@ -228,7 +228,7 @@ export default function Products() {
           )}
         </Box>
 
-        {/* 💰 Price */}
+        {/* Price */}
         <Box
           display="flex"
           alignItems="center"
@@ -263,7 +263,7 @@ export default function Products() {
           )}
         </Box>
 
-        {/* 🧹 Clear All */}
+        {/* Clear All */}
         {(search ||
           category !== "all" ||
           priceRange !== "all" ||
@@ -328,7 +328,7 @@ export default function Products() {
               {paginated.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={5} // 👈 total number of columns
+                    colSpan={5} // total number of columns
                     align="center"
                     sx={{ py: 4, color: "text.secondary" }}
                   >
