@@ -39,10 +39,10 @@ const About = () => {
           alt="Our Story"
           style={{
             width: "100%",
-            maxWidth: "1200px", // max width
-            height: "auto", // aspect ratio
+            maxWidth: "1200px",
+            height: "auto",
             display: "block",
-            objectFit: "contain", // full image visible
+            objectFit: "contain", 
           }}
         />
       </Box>

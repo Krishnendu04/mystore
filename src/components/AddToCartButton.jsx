@@ -17,7 +17,7 @@ const AddToCartButton = ({ product }) => {
         width: "100%",
         maxWidth: "100%",
         textTransform: "none",
-        px: { xs: 1.5, sm: 2.5, md: 3 }, // left/right spacing
+        px: { xs: 1.5, sm: 2.5, md: 3 },
         py: { xs: 0.8, sm: 1, md: 1.2 },
 
         fontSize: {
@@ -30,8 +30,8 @@ const AddToCartButton = ({ product }) => {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        gap: 1, // spacing between icon & text
-        whiteSpace: "nowrap", // prevent wrapping
+        gap: 1, 
+        whiteSpace: "nowrap",
         borderRadius: 2,
       }}
     >
